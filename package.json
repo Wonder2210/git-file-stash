@@ -2,6 +2,7 @@
   "name": "extension-project",
   "displayName": "extension-project",
   "description": "",
+  "publisher": "vscode-samples",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.94.0"
@@ -9,16 +10,10 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "*"
+  ],
   "main": "./out/extension.js",
-  "contributes": {
-    "commands": [
-      {
-        "command": "extension-project.helloWorld",
-        "title": "Hello World"
-      }
-    ]
-  },
   "scripts": {
     "vscode:prepublish": "pnpm run compile",
     "compile": "tsc -p ./",

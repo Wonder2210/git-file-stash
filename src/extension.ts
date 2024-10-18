@@ -6,20 +6,33 @@ import * as vscode from 'vscode';
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
 
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "extension-project" is now active!');
-
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	const disposable = vscode.commands.registerCommand('extension-project.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from extension-project!');
-	});
-
-	context.subscriptions.push(disposable);
+	  // Create a status bar item
+	  const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
+	  statusBarItem.text = '$(list-selection) Quick Select';
+	  statusBarItem.tooltip = 'Open Quick Selection Menu';
+	  statusBarItem.command = 'extension.openQuickSelect';
+	  statusBarItem.show();
+	
+	  context.subscriptions.push(statusBarItem);
+	
+	  // Register the command that will be executed when the status bar button is clicked
+	  const command = vscode.commands.registerCommand('extension.openQuickSelect', async () => {
+		const options = [
+		  'Option 1',
+		  'Option 2',
+		  'Option 3'
+		];
+		
+		const selectedOption = await vscode.window.showQuickPick(options, {
+		  placeHolder: 'Select an option',
+		});
+	
+		if (selectedOption) {
+		  vscode.window.showInformationMessage(`You selected: ${selectedOption}`);
+		}
+	  });
+	
+	  context.subscriptions.push(command);
 }
 // This method is called when your extension is deactivated
 export function deactivate() { }
