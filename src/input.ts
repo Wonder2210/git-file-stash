@@ -10,5 +10,5 @@ export async function showInputBox() {
 			return text === '123' ? 'Not 123!' : null;
 		}
 	});
-	window.showInformationMessage(`Got: ${result}`);
+	return result;
 }
