@@ -1,79 +1,47 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import { SimpleGit, simpleGit, CleanOptions, TaskOptions } from "simple-git";
-import path from 'path';
+import { SimpleGit, simpleGit, CleanOptions } from "simple-git";
 import { showInputBox } from './input';
-import { log } from 'console';
+import { multiStepInput } from './multiStepInput';
+import { GitStashManager } from './stashManager';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
 
-	const git: SimpleGit = simpleGit(vscode.workspace.workspaceFolders?.[0].uri.fsPath || "").clean(CleanOptions.FORCE);
 
-	const gitStash = async (message: string) => {
-		try {
-			const file = vscode.window.activeTextEditor?.document.uri.fsPath;
-			const res = await git.stash(["push", "-m", `"${message}"`, `${file}`]);
-			if (res.includes("No local changes to save")) {
-				vscode.window.showErrorMessage("No Local Changes to save");
-			}
-		}
-		catch (error) {
-			console.error(error);
-		}
-	};
 
 	// TODO extract logic into a class to manage better the git
 
-	const getStashed = async () => {
-		const list = await git.stashList(["--stat"]);
 
-		const relatedStash = list.all.filter(file => {
-			const diff = file?.diff;
-
-			const filer = diff?.files[0].file as string;
-
-			if (vscode.window.activeTextEditor?.document.uri.fsPath.endsWith(filer) && diff?.files.length === 1) {
-				return file;
-			}
-		});
-
-		return relatedStash
-	};
 	// Use the hash to restore the file
-
-	//  Untracked files ?
-
-
-	//  Delete stashes using git stash drop stash@{index in the list}
 
 
 	// Create a status bar item
 	const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
-	statusBarItem.text = 'Quick Select';
+	statusBarItem.text = 'File Stash';
 	statusBarItem.tooltip = 'View File Stash';
 	statusBarItem.command = 'extension.openQuickSelect';
 	statusBarItem.show();
 
 	context.subscriptions.push(statusBarItem);
 
+	const git: SimpleGit = simpleGit(vscode.workspace.workspaceFolders?.[0].uri.fsPath || "").clean(CleanOptions.FORCE);
+
+	const gitStashManager = new GitStashManager(git);
+
 	// Register the command that will be executed when the status bar button is clicked
-	const command = vscode.commands.registerCommand('extension.openQuickSelect', () => {
+	const command = vscode.commands.registerCommand('extension.openQuickSelect', async () => {
 		// TODO handle promises
-		const stashedItems = (async () => {
-			const res = await getStashed();
-			return res;
-		})();
-		console.log(stashedItems);
-		const options: vscode.QuickPickItem[] = [{
-			label: "Action 1",
-		}, {
-			label: "Herer"
-		}, {
-			label: "Heredr"
-		}, {
+
+		const stashedItems = await gitStashManager.getStashed()
+		const options: vscode.QuickPickItem[] = [...(stashedItems.map((item) => {
+			let label = item.message;
+			label = label && label.length ? label.match(/(?:"[^"]*"|^[^"]*$)/)?.[0].replace(/"/g, "") : "";
+
+			return { label };
+		})), {
 			label: "",
 			kind: vscode.QuickPickItemKind.Separator
 		},
@@ -85,25 +53,27 @@ export function activate(context: vscode.ExtensionContext) {
 
 		quickPick.items = options;
 
-		quickPick.onDidChangeSelection((e) => {
+		quickPick.onDidChangeSelection(async (e) => {
 			const itemSelected = e[0];
-			console.log(itemSelected.label);
+
+			const stashSelected = stashedItems.find((item) => item.message.includes(itemSelected?.label || ""));
+
+
+			const file = stashSelected?.diff?.files[0].file as string;
+			multiStepInput(context, stashSelected).catch(console.error);
+
 
 			if (itemSelected?.label === "Stash file") {
-				console.log("selected");
-
-				showInputBox().then((res) => gitStash(res ?? "DefaULR")).catch(console.error);
+				showInputBox().then((res) => gitStashManager.gitStash(res ?? "default")).catch(console.error);
 			}
-
 		});
 
 		quickPick.onDidHide(() => quickPick.dispose());
 
 		quickPick.show();
-
 	});
 
 	context.subscriptions.push(command);
 }
-// This method is called when your extension is deactivated
+// This method is called when your extension is deactivated5
 export function deactivate() { }
