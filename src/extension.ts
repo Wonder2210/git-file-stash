@@ -1,23 +1,11 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import { SimpleGit, simpleGit, CleanOptions } from "simple-git";
 import { showInputBox } from './input';
 import { multiStepInput } from './multiStepInput';
 import { GitStashManager } from './stashManager';
 
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
+
 export function activate(context: vscode.ExtensionContext) {
-
-
-
-	// TODO extract logic into a class to manage better the git
-
-
-	// Use the hash to restore the file
-
-
 	// Create a status bar item
 	const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
 	statusBarItem.text = 'File Stash';
@@ -33,12 +21,11 @@ export function activate(context: vscode.ExtensionContext) {
 
 	// Register the command that will be executed when the status bar button is clicked
 	const command = vscode.commands.registerCommand('extension.openQuickSelect', async () => {
-		// TODO handle promises
 
 		const stashedItems = await gitStashManager.getStashed()
 		const options: vscode.QuickPickItem[] = [...(stashedItems.map((item) => {
 			let label = item.message;
-			label = label && label.length ? label.match(/(?:"[^"]*"|^[^"]*$)/)?.[0].replace(/"/g, "") : "";
+			label = label && label.length ? label.match(/(?:"[^"]*"|^[^"]*$)/)?.[0].replace(/"/g, "") as string : "";
 
 			return { label };
 		})), {

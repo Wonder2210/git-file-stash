@@ -17,11 +17,9 @@ export class GitStashManager {
         }
     }
 
-    async applyStashOrCatchOverwrite(hash: string, file: string) {
+    async applyStashOrCatchOverwrite(hash: string) {
         try {
             await this.git.stash(["apply", `${hash}`]);
-            vscode.window.showInformationMessage("File Restored");
-            vscode.window.showTextDocument(vscode.Uri.file(file));
         } catch (error) {
             const gitError = error as GitResponseError;
             const isOverwriteError = gitError.message.includes(" Your local changes to the following files would be overwritten by merge");

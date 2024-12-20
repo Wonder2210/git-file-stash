@@ -57,7 +57,7 @@ export async function multiStepInput(context: ExtensionContext, stash: StashInfo
 		});
 		if (pick.label === "Apply") {
 			try {
-				await gitStashManager.applyStashOrCatchOverwrite(stash?.hash || "", stash?.diff?.files[0].file as string);
+				await gitStashManager.applyStashOrCatchOverwrite(stash?.hash || "");
 			} catch (error) {
 				return (input: MultiStepInput) => overwriteFile(input, state, stash);
 			}
@@ -87,7 +87,7 @@ export async function multiStepInput(context: ExtensionContext, stash: StashInfo
 				await gitStashManager.cleanFile();
 
 				setTimeout(async () => {
-					await gitStashManager.applyStashOrCatchOverwrite(stash?.hash || "", stash?.diff?.files[0].file as string);
+					await gitStashManager.applyStashOrCatchOverwrite(stash?.hash || "");
 				}, 200);
 
 			} catch (error) {
