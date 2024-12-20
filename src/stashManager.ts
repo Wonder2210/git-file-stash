@@ -74,4 +74,13 @@ export class GitStashManager {
             return [];
         }
     }
+
+    async cleanFile() {
+        try {
+            const file = vscode.window.activeTextEditor?.document.uri.fsPath;
+            await this.git.checkout(["--", `${file}`]);
+        } catch (error) {
+            console.error(error);
+        }
+    }
 }

@@ -57,10 +57,9 @@ export function activate(context: vscode.ExtensionContext) {
 			const itemSelected = e[0];
 
 			const stashSelected = stashedItems.find((item) => item.message.includes(itemSelected?.label || ""));
+			const stashIndex = stashedItems.findIndex((item) => item.message.includes(itemSelected?.label || ""));
 
-
-			const file = stashSelected?.diff?.files[0].file as string;
-			multiStepInput(context, stashSelected).catch(console.error);
+			multiStepInput(context, stashSelected, stashIndex).catch(console.error);
 
 
 			if (itemSelected?.label === "Stash file") {

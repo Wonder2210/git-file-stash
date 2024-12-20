@@ -14,7 +14,7 @@ import { GitStashManager } from './stashManager';
  * This first part uses the helper class `MultiStepInput` that wraps the API for the multi-step case.
  */
 type StashInfo = (DefaultLogFields & ListLogLine) | undefined
-export async function multiStepInput(context: ExtensionContext, stash: StashInfo) {
+export async function multiStepInput(context: ExtensionContext, stash: StashInfo, stashIndex: number) {
 
 	const git: SimpleGit = simpleGit(vscode.workspace.workspaceFolders?.[0].uri.fsPath || "").clean(CleanOptions.FORCE);
 
@@ -24,10 +24,10 @@ export async function multiStepInput(context: ExtensionContext, stash: StashInfo
 		constructor(public iconPath: { light: Uri; dark: Uri; }, public tooltip: string) { }
 	}
 
-	const resourceGroups: QuickPickItem[] = ['Delete', 'Update', 'Apply']
+	const resourceGroups: QuickPickItem[] = ['Delete', 'Apply']
 		.map(label => ({ label }));
 
-	const overwriteFileOptions: QuickPickItem[] = ['Yes', 'Cancel'].map(label => ({ label }));
+	const overwriteFileOptions: QuickPickItem[] = ['Clean and apply', 'Cancel'].map(label => ({ label }));
 
 
 	interface State {
@@ -59,25 +59,41 @@ export async function multiStepInput(context: ExtensionContext, stash: StashInfo
 			try {
 				await gitStashManager.applyStashOrCatchOverwrite(stash?.hash || "", stash?.diff?.files[0].file as string);
 			} catch (error) {
-				return (input: MultiStepInput) => overwriteFile(input, state);
+				return (input: MultiStepInput) => overwriteFile(input, state, stash);
 			}
 
 		}
-		if (pick instanceof MyButton) {
-			return (input: MultiStepInput) => inputUpdatedValue(input, state);
+		if (pick.label === "Delete") {
+			try {
+				await gitStashManager.deleteStash(stashIndex);
+			} catch (error) {
+				console.error(error);
+			}
 		}
 		state.resourceGroup = pick;
-		return (input: MultiStepInput) => inputUpdatedValue(input, state);
 	}
 
-	async function overwriteFile(input: MultiStepInput, state: Partial<State>) {
+	async function overwriteFile(input: MultiStepInput, state: Partial<State>, stash: StashInfo) {
 		const pick = await input.showQuickPick({
 			title,
-			placeholder: 'This file ',
+			placeholder: 'Your local changes would be overwritten by merge',
 			items: overwriteFileOptions,
 			activeItem: typeof state.resourceGroup !== 'string' ? state.resourceGroup : undefined,
 			shouldResume: shouldResume
 		});
+
+		if (pick.label === "Clean and apply") {
+			try {
+				await gitStashManager.cleanFile();
+
+				setTimeout(async () => {
+					await gitStashManager.applyStashOrCatchOverwrite(stash?.hash || "", stash?.diff?.files[0].file as string);
+				}, 200);
+
+			} catch (error) {
+				console.error(error);
+			}
+		}
 
 	}
 
@@ -116,7 +132,6 @@ export async function multiStepInput(context: ExtensionContext, stash: StashInfo
 	}
 
 	const state = await collectInputs();
-	window.showInformationMessage(`Creating Application Service '${state.name}'`);
 }
 
 
