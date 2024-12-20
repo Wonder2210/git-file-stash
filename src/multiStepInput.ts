@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import simpleGit, { CleanOptions, DefaultLogFields, SimpleGit, ListLogLine } from 'simple-git';
-import { QuickPickItem, window, Disposable, QuickInputButton, QuickInput, ExtensionContext, QuickInputButtons, Uri } from 'vscode';
+import { QuickPickItem, window, Disposable, QuickInputButton, QuickInput, QuickInputButtons, Uri } from 'vscode';
 import * as vscode from 'vscode';
 import { GitStashManager } from './stashManager';
 
@@ -14,7 +14,7 @@ import { GitStashManager } from './stashManager';
  * This first part uses the helper class `MultiStepInput` that wraps the API for the multi-step case.
  */
 type StashInfo = (DefaultLogFields & ListLogLine) | undefined
-export async function multiStepInput(context: ExtensionContext, stash: StashInfo, stashIndex: number) {
+export async function multiStepInput(stash: StashInfo, stashIndex: number) {
 
 	const git: SimpleGit = simpleGit(vscode.workspace.workspaceFolders?.[0].uri.fsPath || "").clean(CleanOptions.FORCE);
 
@@ -228,7 +228,6 @@ class MultiStepInput {
 						if (item === QuickInputButtons.Back) {
 							reject(InputFlowAction.back);
 						} else {
-							// eslint-disable-next-line @typescript-eslint/no-explicit-any
 							resolve((item as any));
 						}
 					}),
@@ -271,7 +270,6 @@ class MultiStepInput {
 						if (item === QuickInputButtons.Back) {
 							reject(InputFlowAction.back);
 						} else {
-							// eslint-disable-next-line @typescript-eslint/no-explicit-any
 							resolve(item as any);
 						}
 					}),
