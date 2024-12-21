@@ -23,66 +23,60 @@ export function activate(context: vscode.ExtensionContext) {
 	const command = vscode.commands.registerCommand('extension.openQuickSelect', async () => {
 
 		const stashedItems = await gitStashManager.getStashed();
-		const options: vscode.QuickPickItem[] = [...(stashedItems.map((item) => {
-			let label = item.message;
-			label = label && label.length ? label.match(/(?:"[^"]*"|^[^"]*$)/)?.[0].replace(/"/g, "") as string : "";
-
-			return { label };
-		})), {
-			label: "",
-			kind: vscode.QuickPickItemKind.Separator
-		},
-		{
-			label: "Stash file",
-		}];
+		const quickPickOptions: vscode.QuickPickItem[] = [
+			...stashedItems.map((stashItem) => {
+				let label = stashItem.message;
+				label = label && label.length ? label.match(/(?:"[^"]*"|^[^"]*$)/)?.[0].replace(/"/g, "") as string : "";
+				return { label };
+			}),
+			{
+				label: "",
+				kind: vscode.QuickPickItemKind.Separator
+			},
+			{
+				label: "Stash file",
+			}
+		];
 
 		const quickPick = vscode.window.createQuickPick();
-
 		quickPick.title = "File Stash List";
+		quickPick.items = quickPickOptions;
 
-		quickPick.items = options;
+		quickPick.onDidChangeSelection(async (selectedItems) => {
+			const selectedItem = selectedItems[0];
 
-		quickPick.onDidChangeSelection(async (e) => {
-			const itemSelected = e[0];
+			const selectedStash = stashedItems.find((stashItem) => stashItem.message.includes(selectedItem?.label || ""));
+			const selectedStashIndex = stashedItems.findIndex((stashItem) => stashItem.message.includes(selectedItem?.label || ""));
 
-			const stashSelected = stashedItems.find((item) => item.message.includes(itemSelected?.label || ""));
-			const stashIndex = stashedItems.findIndex((item) => item.message.includes(itemSelected?.label || ""));
+			multiStepInput(selectedStash, selectedStashIndex).catch(console.error);
 
-			multiStepInput(stashSelected, stashIndex).catch(console.error);
-
-
-			if (itemSelected?.label === "Stash file") {
-				const defaultName = await (async () => {
-					const branchName = await gitStashManager.getBranchName();
-
-					const fileName = vscode.window.activeTextEditor?.document.fileName.split("/").pop();
-
-
-					const stashName = `${fileName} from ${branchName}`;
-
-					const ocurrences = options.filter(({ label }) => label.includes(stashName)).length;
-
-					return ocurrences ? `${stashName}-${ocurrences + 1}` : stashName;
+			if (selectedItem?.label === "Stash file") {
+				const defaultStashName = await (async () => {
+					const currentBranchName = await gitStashManager.getBranchName();
+					const currentFileName = vscode.window.activeTextEditor?.document.fileName.split("/").pop();
+					const generatedStashName = `${currentFileName} from ${currentBranchName}`;
+					const occurrenceCount = quickPickOptions.filter(({ label }) => label.includes(generatedStashName)).length;
+					return occurrenceCount ? `${generatedStashName}-${occurrenceCount + 1}` : generatedStashName;
 				})();
+
 				showInputBox({
-					validate: (value: string) => {
-						const isRepeatedName = options.find(({ label }) => label === value);
-						if (isRepeatedName) {
-							return "A stash with this name already exist";
+					validate: (inputValue: string) => {
+						const isDuplicateName = quickPickOptions.find(({ label }) => label === inputValue);
+						if (isDuplicateName) {
+							return "A stash with this name already exists";
 						}
 						return null;
 					},
-					value: defaultName,
-				}).then((res) => {
-					if (res) {
-						gitStashManager.gitStash(res);
+					value: defaultStashName,
+				}).then((inputResult) => {
+					if (inputResult) {
+						gitStashManager.gitStash(inputResult);
 					}
 				}).catch(console.error);
 			}
 		});
 
 		quickPick.onDidHide(() => quickPick.dispose());
-
 		quickPick.show();
 	});
 
