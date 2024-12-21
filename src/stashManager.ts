@@ -81,4 +81,10 @@ export class GitStashManager {
             console.error(error);
         }
     }
+
+    async getBranchName() {
+        const name = await this.git.branch();
+
+        return name.current;
+    }
 }

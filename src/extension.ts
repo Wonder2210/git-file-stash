@@ -50,7 +50,32 @@ export function activate(context: vscode.ExtensionContext) {
 
 
 			if (itemSelected?.label === "Stash file") {
-				showInputBox().then((res) => gitStashManager.gitStash(res ?? "default")).catch(console.error);
+				const defaultName = await (async () => {
+					const branchName = await gitStashManager.getBranchName();
+
+					const fileName = vscode.window.activeTextEditor?.document.fileName.split("/").pop();
+
+
+					const stashName = `${fileName} from ${branchName}`;
+
+					const ocurrences = options.filter(({ label }) => label.includes(stashName)).length;
+
+					return ocurrences ? `${stashName}-${ocurrences + 1}` : stashName;
+				})();
+				showInputBox({
+					validate: (value: string) => {
+						const isRepeatedName = options.find(({ label }) => label === value);
+						if (isRepeatedName) {
+							return "A stash with this name already exist";
+						}
+						return null;
+					},
+					value: defaultName,
+				}).then((res) => {
+					if (res) {
+						gitStashManager.gitStash(res);
+					}
+				}).catch(console.error);
 			}
 		});
 

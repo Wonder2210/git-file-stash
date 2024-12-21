@@ -1,12 +1,12 @@
-import {window} from "vscode";
+import { window } from "vscode";
 
-export async function showInputBox() {
+export async function showInputBox({ validate, value }: { validate?: (value: string) => string | null; value?: string }) {
 	const result = await window.showInputBox({
-		value: 'abcdef',
+		value,
 		valueSelection: [2, 4],
-		placeHolder: 'For example: fedcba. But not: 123',
-		// Default must have to ber the name of the file + the branch
-		//validate name is unique before save
+		placeHolder: 'Name to identify the stash',
+		validateInput: validate,
+		
 	});
 	return result;
 }
