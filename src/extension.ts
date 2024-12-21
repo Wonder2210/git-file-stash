@@ -38,6 +38,8 @@ export function activate(context: vscode.ExtensionContext) {
 
 		const quickPick = vscode.window.createQuickPick();
 
+		quickPick.title = "File Stash List";
+
 		quickPick.items = options;
 
 		quickPick.onDidChangeSelection(async (e) => {
