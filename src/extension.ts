@@ -21,7 +21,7 @@ export function activate(context: vscode.ExtensionContext) {
     // Register the command that will be executed when the status bar button is clicked
     const command = vscode.commands.registerCommand('extension.openQuickSelect', async () => {
 
-        const stashedItems = await gitStashManager.getStashed();
+        const stashedItems = await gitStashManager.getStashedItems();
         const quickPickOptions: vscode.QuickPickItem[] = [
             ...stashedItems.map((stashItem) => {
                 let label = stashItem.message;
@@ -73,7 +73,7 @@ export function activate(context: vscode.ExtensionContext) {
                     value: defaultStashName,
                 }).then((inputResult) => {
                     if (inputResult) {
-                        gitStashManager.gitStash(inputResult);
+                        gitStashManager.stashChanges(inputResult);
                     }
                 }).catch(console.error);
             }

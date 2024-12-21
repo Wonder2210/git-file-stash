@@ -84,7 +84,7 @@ export async function multiStepInput(stash: StashInfo, stashIndex: number) {
 
 		if (pick.label === "Clean and apply") {
 			try {
-				await gitStashManager.cleanFile();
+				await gitStashManager.cleanCurrentFileChanges();
 
 				setTimeout(async () => {
 					await gitStashManager.applyStashOrCatchOverwrite(stash?.hash || "");

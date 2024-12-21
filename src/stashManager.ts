@@ -8,83 +8,94 @@ export class GitStashManager {
         this.git = git;
     }
 
-    async deleteStash(index: number) {
+    async deleteStash(stashIndex: number) {
         try {
-            await this.git.stash(["drop", `stash@{${index}}`]);
+            await this.git.stash(["drop", `stash@{${stashIndex}}`]);
             vscode.window.showInformationMessage("Stash Deleted");
         } catch (error) {
-            console.error(error);
+            vscode.window.showErrorMessage("Failed to delete stash");
+            console.error("Error deleting stash:", error);
         }
     }
 
-    async applyStashOrCatchOverwrite(hash: string) {
+    async applyStashOrCatchOverwrite(stashHash: string) {
         try {
-            await this.git.stash(["apply", `${hash}`]);
+            await this.git.stash(["apply", `${stashHash}`]);
         } catch (error) {
             const gitError = error as GitResponseError;
             const isOverwriteError = gitError.message.includes(" Your local changes to the following files would be overwritten by merge");
             if (isOverwriteError) {
                 throw error;
+            } else {
+                vscode.window.showErrorMessage("Failed to apply stash");
+                console.error("Error applying stash:", error);
             }
         }
     }
 
-    async getFileIsModified(): Promise<boolean> {
+    async isFileModified(): Promise<boolean> {
         try {
             const status = await this.git.status();
-            const filesModified = status.modified.map((file) => file);
+            const modifiedFiles = status.modified.map((file) => file);
 
-            const fileRelativePath = vscode.window.activeTextEditor?.document.uri.fsPath;
-            const isModified = filesModified.some((file) => fileRelativePath?.endsWith(file));
+            const activeFilePath = vscode.window.activeTextEditor?.document.uri.fsPath;
+            const isModified = modifiedFiles.some((file) => activeFilePath?.endsWith(file));
 
-            return !!isModified;
+            return isModified;
         } catch (error) {
-            console.error(error);
+            console.error("Error checking if file is modified:", error);
             return false;
         }
     }
 
-    async gitStash(message: string) {
+    async stashChanges(stashMessage: string) {
         try {
-            const file = vscode.window.activeTextEditor?.document.uri.fsPath;
-            const res = await this.git.stash(["push", "-m", `"${message}"`, `${file}`]);
-            if (res.includes("No local changes to save")) {
+            const activeFilePath = vscode.window.activeTextEditor?.document.uri.fsPath;
+            const result = await this.git.stash(["push", "-m", `"${stashMessage}"`, `${activeFilePath}`]);
+            if (result.includes("No local changes to save")) {
                 vscode.window.showErrorMessage("No Local Changes to save");
             }
         } catch (error) {
-            console.error(error);
+            vscode.window.showErrorMessage("Failed to stash change");
+            console.error("Error stashing changes:", error);
         }
     }
 
-    async getStashed() {
+    async getStashedItems() {
         try {
-            const list = await this.git.stashList(["--stat"]);
-            const relatedStash = list.all.filter(file => {
-                const diff = file?.diff;
-                const filer = diff?.files[0].file as string;
-                if (vscode.window.activeTextEditor?.document.uri.fsPath.endsWith(filer) && diff?.files.length === 1) {
-                    return file;
+            const stashList = await this.git.stashList(["--stat"]);
+            const relatedStashes = stashList.all.filter(stash => {
+                const diff = stash?.diff;
+                const filePath = diff?.files[0].file as string;
+                if (vscode.window.activeTextEditor?.document.uri.fsPath.endsWith(filePath) && diff?.files.length === 1) {
+                    return stash;
                 }
             });
-            return relatedStash;
+            return relatedStashes;
         } catch (error) {
-            console.error(error);
+            console.error("Error getting stashed items:", error);
             return [];
         }
     }
 
-    async cleanFile() {
+    async getBranchName(): Promise<string> {
         try {
-            const file = vscode.window.activeTextEditor?.document.uri.fsPath;
-            await this.git.checkout(["--", `${file}`]);
+            const branchSummary = await this.git.branch();
+            return branchSummary.current;
         } catch (error) {
-            console.error(error);
+            return '';
         }
     }
 
-    async getBranchName() {
-        const name = await this.git.branch();
-
-        return name.current;
+    async cleanCurrentFileChanges() {
+        const activeFilePath = vscode.window.activeTextEditor?.document.uri.fsPath as string;
+        const fileName = activeFilePath.split("/").pop();
+        try {
+            await this.git.checkout(["--", activeFilePath]);
+            vscode.window.showInformationMessage(`Changes in ${fileName} have been discarded`);
+        } catch (error) {
+            vscode.window.showErrorMessage(`Failed to discard changes in ${fileName}`);
+            console.error(`Error discarding changes in ${fileName}:`, error);
+        }
     }
 }
