@@ -14,7 +14,7 @@ import { GitStashManager } from './stashManager';
  * This first part uses the helper class `MultiStepInput` that wraps the API for the multi-step case.
  */
 type StashInfo = (DefaultLogFields & ListLogLine) | undefined
-export async function multiStepInput(stash: StashInfo, stashIndex: number) {
+export async function multiStepInput(stashInfo: StashInfo, stashIndex: number) {
 
 	const git: SimpleGit = simpleGit(vscode.workspace.workspaceFolders?.[0].uri.fsPath || "").clean(CleanOptions.FORCE);
 
@@ -24,13 +24,13 @@ export async function multiStepInput(stash: StashInfo, stashIndex: number) {
 		constructor(public iconPath: { light: Uri; dark: Uri; }, public tooltip: string) { }
 	}
 
-	const resourceGroups: QuickPickItem[] = ['Delete', 'Apply']
+	const stashActions: QuickPickItem[] = ['Delete', 'Apply']
 		.map(label => ({ label }));
 
-	const overwriteFileOptions: QuickPickItem[] = ['Clean and apply', 'Cancel'].map(label => ({ label }));
+	const overwriteOptions: QuickPickItem[] = ['Clean and apply', 'Cancel'].map(label => ({ label }));
 
 
-	interface State {
+	interface MultiStepState {
 		title: string;
 		resourceGroup: QuickPickItem | string;
 		name: string;
@@ -40,18 +40,18 @@ export async function multiStepInput(stash: StashInfo, stashIndex: number) {
 	}
 
 	async function collectInputs() {
-		const state = {} as Partial<State>;
-		await MultiStepInput.run(input => selectStashAction(input, state, stash));
-		return state as State;
+		const state = {} as Partial<MultiStepState>;
+		await MultiStepInput.run(input => selectStashAction(input, state, stashInfo));
+		return state as MultiStepState;
 	}
 
 	const title = 'Stash File';
 
-	async function selectStashAction(input: MultiStepInput, state: Partial<State>, stash: StashInfo) {
+	async function selectStashAction(input: MultiStepInput, state: Partial<MultiStepState>, stash: StashInfo) {
 		const pick = await input.showQuickPick({
 			title,
 			placeholder: 'Choose a stash action',
-			items: resourceGroups,
+			items: stashActions,
 			activeItem: typeof state.resourceGroup !== 'string' ? state.resourceGroup : undefined,
 			shouldResume: shouldResume
 		});
@@ -73,11 +73,11 @@ export async function multiStepInput(stash: StashInfo, stashIndex: number) {
 		state.resourceGroup = pick;
 	}
 
-	async function overwriteFile(input: MultiStepInput, state: Partial<State>, stash: StashInfo) {
+	async function overwriteFile(input: MultiStepInput, state: Partial<MultiStepState>, stash: StashInfo) {
 		const pick = await input.showQuickPick({
 			title,
 			placeholder: 'Your local changes would be overwritten by merge',
-			items: overwriteFileOptions,
+			items: overwriteOptions,
 			activeItem: typeof state.resourceGroup !== 'string' ? state.resourceGroup : undefined,
 			shouldResume: shouldResume
 		});
