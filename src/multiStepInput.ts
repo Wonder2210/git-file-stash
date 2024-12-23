@@ -1,17 +1,7 @@
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
-
 import simpleGit, { CleanOptions, DefaultLogFields, SimpleGit, ListLogLine } from 'simple-git';
 import { QuickPickItem, window, Disposable, QuickInputButton, QuickInput, QuickInputButtons, Uri, ExtensionContext, workspace } from 'vscode';
 import { GitStashManager } from './stashManager';
 
-/**
- * A multi-step input using window.createQuickPick() and window.createInputBox().
- * 
- * This first part uses the helper class `MultiStepInput` that wraps the API for the multi-step case.
- */
 type StashInfo = (DefaultLogFields & ListLogLine) | undefined
 export async function multiStepInput(context: ExtensionContext, stashInfo: StashInfo, stashIndex: number) {
 
