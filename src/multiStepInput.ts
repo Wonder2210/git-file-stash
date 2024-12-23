@@ -24,13 +24,13 @@ export async function multiStepInput(context: ExtensionContext, stashInfo: Stash
 			label: "Delete",
 			iconPath: {
 				dark: Uri.file(context.asAbsolutePath('resources/dark/trash.svg')),
-				light: Uri.file(context.asAbsolutePath('resources/dark/trash.svg'))
+				light: Uri.file(context.asAbsolutePath('resources/light/trash.svg'))
 			},
 		}, {
 			label: "Apply",
 			iconPath: {
 				dark: Uri.file(context.asAbsolutePath('resources/dark/update.svg')),
-				light: Uri.file(context.asAbsolutePath('resources/dark/update.svg'))
+				light: Uri.file(context.asAbsolutePath('resources/light/update.svg'))
 			},
 		}];
 
@@ -39,13 +39,13 @@ export async function multiStepInput(context: ExtensionContext, stashInfo: Stash
 			label: "Cancel",
 			iconPath: {
 				dark: Uri.file(context.asAbsolutePath('resources/dark/close.svg')),
-				light: Uri.file(context.asAbsolutePath('resources/dark/close.svg'))
+				light: Uri.file(context.asAbsolutePath('resources/light/close.svg'))
 			},
 		}, {
 			label: "Clean and apply",
 			iconPath: {
 				dark: Uri.file(context.asAbsolutePath('resources/dark/update.svg')),
-				light: Uri.file(context.asAbsolutePath('resources/dark/update.svg'))
+				light: Uri.file(context.asAbsolutePath('resources/light/update.svg'))
 			},
 		}];
 
