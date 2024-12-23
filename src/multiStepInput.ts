@@ -26,7 +26,7 @@ export async function multiStepInput(context: ExtensionContext, stashInfo: Stash
 				dark: Uri.file(context.asAbsolutePath('resources/dark/trash.svg')),
 				light: Uri.file(context.asAbsolutePath('resources/dark/trash.svg'))
 			},
-		},{
+		}, {
 			label: "Apply",
 			iconPath: {
 				dark: Uri.file(context.asAbsolutePath('resources/dark/update.svg')),
@@ -34,7 +34,20 @@ export async function multiStepInput(context: ExtensionContext, stashInfo: Stash
 			},
 		}];
 
-	const overwriteOptions: QuickPickItem[] = ['Clean and apply', 'Cancel'].map(label => ({ label }));
+	const overwriteOptions: QuickPickItem[] = [
+		{
+			label: "Cancel",
+			iconPath: {
+				dark: Uri.file(context.asAbsolutePath('resources/dark/close.svg')),
+				light: Uri.file(context.asAbsolutePath('resources/dark/close.svg'))
+			},
+		}, {
+			label: "Clean and apply",
+			iconPath: {
+				dark: Uri.file(context.asAbsolutePath('resources/dark/update.svg')),
+				light: Uri.file(context.asAbsolutePath('resources/dark/update.svg'))
+			},
+		}];
 
 
 	interface MultiStepState {
