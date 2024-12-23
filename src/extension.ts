@@ -49,7 +49,7 @@ export function activate(context: vscode.ExtensionContext) {
             const selectedStashIndex = stashedItems.findIndex((stashItem) => stashItem.message.includes(selectedItem?.label || ""));
 
             // Call multi-step input process for the selected stash
-            multiStepInput(selectedStash, selectedStashIndex).catch(console.error);
+            multiStepInput(context, selectedStash, selectedStashIndex).catch(console.error);
 
             if (selectedItem?.label === "Stash file") {
                 const defaultStashName = await (async () => {

@@ -4,8 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import simpleGit, { CleanOptions, DefaultLogFields, SimpleGit, ListLogLine } from 'simple-git';
-import { QuickPickItem, window, Disposable, QuickInputButton, QuickInput, QuickInputButtons, Uri } from 'vscode';
-import * as vscode from 'vscode';
+import { QuickPickItem, window, Disposable, QuickInputButton, QuickInput, QuickInputButtons, Uri, ExtensionContext, workspace } from 'vscode';
 import { GitStashManager } from './stashManager';
 
 /**
@@ -14,18 +13,26 @@ import { GitStashManager } from './stashManager';
  * This first part uses the helper class `MultiStepInput` that wraps the API for the multi-step case.
  */
 type StashInfo = (DefaultLogFields & ListLogLine) | undefined
-export async function multiStepInput(stashInfo: StashInfo, stashIndex: number) {
+export async function multiStepInput(context: ExtensionContext, stashInfo: StashInfo, stashIndex: number) {
 
-	const git: SimpleGit = simpleGit(vscode.workspace.workspaceFolders?.[0].uri.fsPath || "").clean(CleanOptions.FORCE);
+	const git: SimpleGit = simpleGit(workspace.workspaceFolders?.[0].uri.fsPath || "").clean(CleanOptions.FORCE);
 
 	const gitStashManager = new GitStashManager(git);
 
-	class MyButton implements QuickInputButton {
-		constructor(public iconPath: { light: Uri; dark: Uri; }, public tooltip: string) { }
-	}
-
-	const stashActions: QuickPickItem[] = ['Delete', 'Apply']
-		.map(label => ({ label }));
+	const stashActions: QuickPickItem[] = [
+		{
+			label: "Delete",
+			iconPath: {
+				dark: Uri.file(context.asAbsolutePath('resources/dark/trash.svg')),
+				light: Uri.file(context.asAbsolutePath('resources/dark/trash.svg'))
+			},
+		},{
+			label: "Apply",
+			iconPath: {
+				dark: Uri.file(context.asAbsolutePath('resources/dark/update.svg')),
+				light: Uri.file(context.asAbsolutePath('resources/dark/update.svg'))
+			},
+		}];
 
 	const overwriteOptions: QuickPickItem[] = ['Clean and apply', 'Cancel'].map(label => ({ label }));
 
