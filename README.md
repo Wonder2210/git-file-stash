@@ -1,6 +1,6 @@
 # Git File Stash
 
-GitFileStash is a Visual Studio Code extension designed to simplify the process of managing Git stashes for individual files. With GitFileStash, you can easily stash, apply, and delete changes to specific files independently, without affecting the rest of your working directory. This extension provides a seamless integration with Git, allowing you to manage your file changes directly from the VS Code interface.
+A simple extension to stash a file in git. You can easily stash, apply, and delete changes to specific files independently, without affecting the rest of your working directory
 
 ## Features
 
