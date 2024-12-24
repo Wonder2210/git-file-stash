@@ -6,7 +6,7 @@
   "version": "1.0.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/jared-christensen/git-stash-manager"
+    "url": "https://github.com/Wonder2210/git-file-stash"
   },
   "engines": {
     "vscode": "^1.94.0"
