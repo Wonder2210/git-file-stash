@@ -8,7 +8,7 @@ GitFileStash is a Visual Studio Code extension designed to simplify the process 
 - **Apply Stash**: Apply a selected stash to your working directory.
 - **Delete Stash**: Delete a selected stash.
 - **Stash Changes**: Stash changes with a custom message.
-- **Clean File Changes**: Discard changes in the current file.
+- **Clean File Changes And Apply Stash**: Discard changes in the current file and apply your desired stash.
 
 ## Requirements
 
