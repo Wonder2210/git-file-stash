@@ -20,7 +20,7 @@ This extension doesn’t require any extra configuration, just install it and vi
 
 ## Release Notes
 
-### 1.0.0
+### 1.2.1
 
 Initial release of GitFileStash.
 
