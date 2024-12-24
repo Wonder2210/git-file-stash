@@ -3,7 +3,7 @@
   "displayName": "Git file stash",
   "description": "A simple extension to stash a file in git, without stashing the entire repository.",
   "publisher": "wonderv",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "icon": "resources/icon.png",
   "license": "MIT",
   "repository": {
