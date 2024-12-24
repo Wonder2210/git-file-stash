@@ -4,6 +4,8 @@
   "description": "A simple extension to stash a file in git, without stashing the entire repository.",
   "publisher": "wonderv",
   "version": "1.0.0",
+  "icon": "resources/logo.png",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/Wonder2210/git-file-stash"
